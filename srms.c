@@ -32,30 +32,42 @@ int main() {
 int loginSystem(){
     char username[50], password[50];
     char fileUser[50], filePass[50], fileRole[20];
+    int attempts = 3;
 
-    printf("=========== Login screen ==========\n");
-    printf("Username: ");
-    if (scanf("%49s", username) != 1) return 0;
-    printf("Password: ");
-    if (scanf("%49s", password) != 1) return 0;
+    while (attempts > 0) {
+        printf("=========== Login screen ==========\n");
+        printf("Username: ");
+        if (scanf("%49s", username) != 1) return 0;
+        printf("Password: ");
+        if (scanf("%49s", password) != 1) return 0;
 
-    FILE *fp = fopen(CREDENTIAL_FILE, "r");
-    if (!fp) {
-        printf("Error: %s not found!\n", CREDENTIAL_FILE);
-        return 0;
-    }
+        FILE *fp = fopen(CREDENTIAL_FILE, "r");
+        if (!fp) {
+            printf("Error: %s not found!\n", CREDENTIAL_FILE);
+            return 0;
+        }
 
-    while (fscanf(fp, "%49s %49s %19s", fileUser, filePass, fileRole) == 3) {
-        if (strcmp(username, fileUser) == 0 && strcmp(password, filePass) == 0) {
-            strcpy(currentRole, fileRole);
-            strcpy(currentUser, fileUser);
-            fclose(fp);
-            printf("\nLogin successful. Welcome %s (%s)\n", currentUser, currentRole);
-            return 1;
+        int success = 0;
+        while (fscanf(fp, "%49s %49s %19s", fileUser, filePass, fileRole) == 3) {
+            if (strcmp(username, fileUser) == 0 && strcmp(password, filePass) == 0) {
+                strcpy(currentRole, fileRole);
+                strcpy(currentUser, fileUser);
+                fclose(fp);
+                printf("\nLogin successful. Welcome %s (%s)\n", currentUser, currentRole);
+                return 1;
+            }
+        }
+
+        fclose(fp);
+        attempts--;
+        if (attempts > 0) {
+            printf("Incorrect username or password. You have %d attempt%s left.\n", attempts, attempts == 1 ? "" : "s");
+            while (getchar() != '\n'); /* flush leftover input */
+        } else {
+            printf("Login failed after 3 attempts.\n");
         }
     }
 
-    fclose(fp);
     return 0;
 }
 
